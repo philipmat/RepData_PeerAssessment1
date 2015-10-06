@@ -78,8 +78,7 @@ print(days.with.steps)
 totalsteps.per.day <- days.with.steps  %>% 
     group_by(date) %>%
     summarize(steps.total=sum(steps))
-
-totalsteps.per.day %>% arrange(steps.total) %>% print
+# print (totalsteps.per.day)
 sum.steps.total <- sum(totalsteps.per.day$steps.total)
 mean.steps.total <- mean(totalsteps.per.day$steps.total)
 median.steps.total <- median(totalsteps.per.day$steps.total)
@@ -89,19 +88,32 @@ Took a **total** of `r fn(sum.steps.total)` steps,
 with an **average** of `r fd(mean.steps.total)` steps 
 and a **median** value of `r fd(median.steps.total)` steps.
 
+
 ``` {r}
 ggplot(days.with.steps, aes(x = date, y = steps, fill = weekday)) + 
     geom_histogram(stat = 'identity') +
     geom_hline(aes(yintercept=mean.steps.total), color = 'red', linetype='dashed') +
     geom_hline(aes(yintercept=median.steps.total), color = 'black', linetype='dotted') +
-    labs(title = 'Total number of steps per day', x = 'Date', y = 'Steps')
+    labs(title = 'Total number of steps taken each day', x = 'Date', y = 'Steps')
 ```
 
 
-
-
 ## What is the average daily activity pattern?
+```{r}
 
+average.by.time <- days.with.steps %>%
+    group_by(interval) %>%
+    summarize(steps.average=mean(steps))
+
+print(tail(average.by.time))
+# plot(average.by.time$interval, average.by.time$steps.average, type='l')
+ggplot(average.by.time, aes(x=interval, y=steps.average, color = interval)) +
+    geom_line() +  # line plot
+    theme(legend.position='none') +  # remove legend - I want the gradient but not the legend
+    labs(title='Average number of steps each 5-minute interval across all days',
+         x='5-minute intervals',
+         y='Average steps taken')
+```
 
 
 ## Imputing missing values

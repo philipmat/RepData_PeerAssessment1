@@ -82,54 +82,12 @@ days.with.steps <- step.data  %>%
     filter(!is.na(steps)) %>% 
     arrange(date) %>%
     mutate(month.name=months(date), weekday=weekdays(date))
-print(days.with.steps)    
-```
+# print(days.with.steps)    
 
-```
-## Source: local data frame [15,264 x 5]
-## 
-##    steps       date interval month.name weekday
-##    (int)     (date)    (int)      (chr)   (chr)
-## 1      0 2012-10-02        0    October Tuesday
-## 2      0 2012-10-02        5    October Tuesday
-## 3      0 2012-10-02       10    October Tuesday
-## 4      0 2012-10-02       15    October Tuesday
-## 5      0 2012-10-02       20    October Tuesday
-## 6      0 2012-10-02       25    October Tuesday
-## 7      0 2012-10-02       30    October Tuesday
-## 8      0 2012-10-02       35    October Tuesday
-## 9      0 2012-10-02       40    October Tuesday
-## 10     0 2012-10-02       45    October Tuesday
-## ..   ...        ...      ...        ...     ...
-```
-
-```r
 totalsteps.per.day <- days.with.steps  %>% 
     group_by(date) %>%
     summarize(steps.total=sum(steps))
-
-totalsteps.per.day %>% arrange(steps.total) %>% print
-```
-
-```
-## Source: local data frame [53 x 2]
-## 
-##          date steps.total
-##        (date)       (int)
-## 1  2012-11-15          41
-## 2  2012-10-02         126
-## 3  2012-10-25        2492
-## 4  2012-11-08        3219
-## 5  2012-11-20        4472
-## 6  2012-10-29        5018
-## 7  2012-11-16        5441
-## 8  2012-10-26        6778
-## 9  2012-11-29        7047
-## 10 2012-11-13        7336
-## ..        ...         ...
-```
-
-```r
+# print (totalsteps.per.day)
 sum.steps.total <- sum(totalsteps.per.day$steps.total)
 mean.steps.total <- mean(totalsteps.per.day$steps.total)
 median.steps.total <- median(totalsteps.per.day$steps.total)
@@ -140,21 +98,52 @@ with an **average** of 10,766 steps
 and a **median** value of 10,765 steps.
 
 
+
 ```r
 ggplot(days.with.steps, aes(x = date, y = steps, fill = weekday)) + 
     geom_histogram(stat = 'identity') +
     geom_hline(aes(yintercept=mean.steps.total), color = 'red', linetype='dashed') +
     geom_hline(aes(yintercept=median.steps.total), color = 'black', linetype='dotted') +
-    labs(title = 'Total number of steps per day', x = 'Date', y = 'Steps')
+    labs(title = 'Total number of steps taken each day', x = 'Date', y = 'Steps')
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
 
-
-
 ## What is the average daily activity pattern?
 
+```r
+average.by.time <- days.with.steps %>%
+    group_by(interval) %>%
+    summarize(steps.average=mean(steps))
+
+print(tail(average.by.time))
+```
+
+```
+## Source: local data frame [6 x 2]
+## 
+##   interval steps.average
+##      (int)         (dbl)
+## 1     2330     2.6037736
+## 2     2335     4.6981132
+## 3     2340     3.3018868
+## 4     2345     0.6415094
+## 5     2350     0.2264151
+## 6     2355     1.0754717
+```
+
+```r
+# plot(average.by.time$interval, average.by.time$steps.average, type='l')
+ggplot(average.by.time, aes(x=interval, y=steps.average, color = interval)) +
+    geom_line() +  # line plot
+    theme(legend.position='none') +  # remove legend - I want the gradient but not the legend
+    labs(title='Average number of steps each 5-minute interval across all days',
+         x='5-minute intervals',
+         y='Average steps taken')
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 
 ## Imputing missing values
