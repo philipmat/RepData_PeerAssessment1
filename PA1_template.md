@@ -82,8 +82,28 @@ days.with.steps <- step.data  %>%
     filter(!is.na(steps)) %>% 
     arrange(date) %>%
     mutate(month.name=months(date), weekday=weekdays(date))
-# print(days.with.steps)    
+print(days.with.steps)    
+```
 
+```
+## Source: local data frame [15,264 x 5]
+## 
+##    steps       date interval month.name weekday
+##    (int)     (date)    (int)      (chr)   (chr)
+## 1      0 2012-10-02        0    October Tuesday
+## 2      0 2012-10-02        5    October Tuesday
+## 3      0 2012-10-02       10    October Tuesday
+## 4      0 2012-10-02       15    October Tuesday
+## 5      0 2012-10-02       20    October Tuesday
+## 6      0 2012-10-02       25    October Tuesday
+## 7      0 2012-10-02       30    October Tuesday
+## 8      0 2012-10-02       35    October Tuesday
+## 9      0 2012-10-02       40    October Tuesday
+## 10     0 2012-10-02       45    October Tuesday
+## ..   ...        ...      ...        ...     ...
+```
+
+```r
 totalsteps.per.day <- days.with.steps  %>% 
     group_by(date) %>%
     summarize(steps.total=sum(steps))
@@ -92,16 +112,13 @@ sum.steps.total <- sum(totalsteps.per.day$steps.total)
 mean.steps.total <- mean(totalsteps.per.day$steps.total)
 median.steps.total <- median(totalsteps.per.day$steps.total)
 ```
-
-Took a **total** of 570,608 steps,
-with an **average** of 10,766 steps 
-and a **median** value of 10,765 steps.
-
+**Q1: Make a histogram of the total number of steps taken each day**
 
 
 ```r
 ggplot(days.with.steps, aes(x = date, y = steps, fill = weekday)) + 
     geom_histogram(stat = 'identity') +
+    ## add lines for the mean and the median - notice that being so close together they overlap
     geom_hline(aes(yintercept=mean.steps.total), color = 'red', linetype='dashed') +
     geom_hline(aes(yintercept=median.steps.total), color = 'black', linetype='dotted') +
     labs(title = 'Total number of steps taken each day', x = 'Date', y = 'Steps')
@@ -109,31 +126,29 @@ ggplot(days.with.steps, aes(x = date, y = steps, fill = weekday)) +
 
 ![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
+**Q2: Calculate and report the mean and median total number of steps taken per day**
+
+Took a **total** of 570,608 steps,
+with an **average** of 10,766 steps 
+and a **median** value of 10,765 steps.
+
 
 ## What is the average daily activity pattern?
 
+
+**Q1: Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)**
+
+
 ```r
+## average the time by interval
 average.by.time <- days.with.steps %>%
     group_by(interval) %>%
     summarize(steps.average=mean(steps))
 
-print(tail(average.by.time))
-```
+# print(head(average.by.time, n = 5))
+# print(tail(average.by.time, n = 5))
 
-```
-## Source: local data frame [6 x 2]
-## 
-##   interval steps.average
-##      (int)         (dbl)
-## 1     2330     2.6037736
-## 2     2335     4.6981132
-## 3     2340     3.3018868
-## 4     2345     0.6415094
-## 5     2350     0.2264151
-## 6     2355     1.0754717
-```
-
-```r
+# This is what we're asked to do, but the default plotting looks... plain.
 # plot(average.by.time$interval, average.by.time$steps.average, type='l')
 ggplot(average.by.time, aes(x=interval, y=steps.average, color = interval)) +
     geom_line() +  # line plot
@@ -145,6 +160,19 @@ ggplot(average.by.time, aes(x=interval, y=steps.average, color = interval)) +
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
+
+**Q2: Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?**
+
+
+```r
+# sort the average.by.time in descending order by steps.average and take the first result
+# it'll be the max
+average.by.time.sorted <- average.by.time %>%
+    arrange(desc(steps.average)) 
+```
+
+The **835 interval** has the **largest number of steps**:
+206.1698113.
 
 ## Imputing missing values
 
