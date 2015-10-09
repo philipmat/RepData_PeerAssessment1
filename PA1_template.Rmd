@@ -14,12 +14,24 @@ fn <- function(n) {
     ## format general number
     fd(n, d=0)
 }
+ht <- function(what, n=5) {
+    cat(paste('First ', n, ':\n', sep = ''))
+    print(head(what, n))
+    cat(paste('Last ', n, ':\n', sep = ''))
+    print(tail(what, n))
+}
 breaks.hourly <- seq(from = 0, to = 2400, by = 100)
 # breaks.ampm <- c(0, 600, 1200, 1800, 2400)
 breaks.ampm <- seq(from=0, to=2400, by=300)
 ```
 
 ### Preamble; Codebook
+
+**Please Note:** GitHub does not render **R Markdown** the same way `knittr` does.
+Nor does it render HTML files, but instead displays their content.  
+Use this link to see 
+the [*properly* rendered Rmd output](https://htmlpreview.github.io/? https://raw.githubusercontent.com/philipmat/RepData_PeerAssessment1/master/PA1_template.html).
+
 
 This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
@@ -37,8 +49,8 @@ The variables included in this dataset are:
 * **interval**: Identifier for the 5-minute interval in which
     measurement was taken
 
-We will be using the *dplyr* library for data processing, and `ggplot2` for drawing:
-```{r message = F}
+We will be using the `dplyr` library for data processing, and `ggplot2` for drawing.
+```{r echo = F, message = F}
 library(dplyr)
 library(ggplot2)
 ```
@@ -54,7 +66,7 @@ if(!file.exists("activity.zip")){
 }
 ```
 
-We don't need to extract the zip - the `unz` file can do this for us:
+We don't need to extract the zip - the `unz` file can do this for us; on the fly:
 
 ```{r}
 step.data <- read.csv(unz('activity.zip', filename = 'activity.csv'), colClasses = c('integer', 'Date', 'integer'))
@@ -63,11 +75,12 @@ step.data <- read.csv(unz('activity.zip', filename = 'activity.csv'), colClasses
 For convenience, we'll also load it into a *dplyr* data frame tbl:
 ```{r}
 step.data <- tbl_df(step.data)
-step.data
+ht(step.data)
 ```
 
 ## What is mean total number of steps taken per day?
 
+For this part, we'll ignore the missing values.
 ```{r}
 mean.steps.per.day <- mean(step.data$steps, na.rm = TRUE)
 median.steps.per.day <- median(step.data$steps, na.rm = TRUE)
@@ -76,16 +89,17 @@ days.with.steps <- step.data  %>%
     filter(!is.na(steps)) %>% 
     arrange(date) %>%
     mutate(month.name=months(date), weekday=weekdays(date))
-print(days.with.steps)    
+ht(days.with.steps)    
 
 totalsteps.per.day <- days.with.steps  %>% 
     group_by(date) %>%
     summarize(steps.total=sum(steps))
-# print (totalsteps.per.day)
+# ht(totalsteps.per.day)
 sum.steps.total <- sum(totalsteps.per.day$steps.total)
 mean.steps.total <- mean(totalsteps.per.day$steps.total)
 median.steps.total <- median(totalsteps.per.day$steps.total)
 ```
+
 **Q1: Make a histogram of the total number of steps taken each day**
 
 ``` {r}
@@ -103,9 +117,11 @@ Took a **total** of `r fn(sum.steps.total)` steps,
 with an **average** of `r fd(mean.steps.total)` steps 
 and a **median** value of `r fd(median.steps.total)` steps.
 
+(*Note:* I've used the [inline R code](http://rmarkdown.rstudio.com/#inline-r-code) syntax to print the numbers 
+calculated above.)
+
 
 ## What is the average daily activity pattern?
-
 
 **Q1: Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)**
 
@@ -115,8 +131,8 @@ average.by.time <- days.with.steps %>%
     group_by(interval) %>%
     summarize(steps.average=mean(steps))
 
-# print(head(average.by.time, n = 5))
-# print(tail(average.by.time, n = 5))
+# ht(head(average.by.time, n = 5))
+# ht(tail(average.by.time, n = 5))
 
 # This is what we're asked to do, but the default plotting looks... plain.
 # plot(average.by.time$interval, average.by.time$steps.average, type='l')
@@ -152,15 +168,16 @@ nrow.step.data <- nrow(step.data)
 nrow.days.with.steps <- nrow(days.with.steps)
 ```
 
-Out of *total* `r nrow.step.data` rows, `r nrow.days.with.steps` records *have values*, leaving us with
-`r nrow.step.data - nrow.days.with.steps` records **without values**.
+Out of *total* `r fn(nrow.step.data)` rows, `r fn(nrow.days.with.steps)` records *have values*, leaving us with
+`r fn(nrow.step.data - nrow.days.with.steps)` records **without values**.
+
 
 **Q2: Devise a strategy for filling in all of the missing values in the dataset.**
 
 Average by time seems a more reliable replacement. Since days might be missing altogether from the dataset, 
 any date-relative strategies could yield missing values by themselves.
 
-**Strategy**: we will replace all the missing values with the average for the interval across all days.
+**Strategy**: we will replace all the missing values with the *average* for the interval across all days.
 
 **Q3: Create a new dataset that is equal to the original dataset but with the missing data filled in.**
 
@@ -173,8 +190,8 @@ for(i in 1:nrow.step.data) {
     }
 }
 # prove that the copy is different than the original
-head(step.data)
-head(step.data2)
+ht(step.data)
+ht(step.data2)
 ```
 
 **Q4: Compare old and new data**
@@ -188,18 +205,18 @@ median.steps2.per.day <- median(step.data2$steps, na.rm = TRUE)
 step.data2 <- step.data2  %>% 
     arrange(date) %>%
     mutate(month.name=months(date), weekday=weekdays(date))
-print(step.data2)    
+ht(step.data2)    
 
 totalsteps2.per.day <- step.data2  %>% 
     group_by(date) %>%
     summarize(steps.total=sum(steps))
-# print (totalsteps.per.day)
+# ht (totalsteps.per.day)
 sum.steps2.total <- sum(totalsteps2.per.day$steps.total)
 mean.steps2.total <- mean(totalsteps2.per.day$steps.total)
 median.steps2.total <- median(totalsteps2.per.day$steps.total)
 ```
 
-> Make a histogram of the total number of steps taken each day 
+**Q4.1: Make a histogram of the total number of steps taken each day**
 
 ``` {r}
 ggplot(step.data2, aes(x = date, y = steps, fill = weekday)) + 
@@ -210,35 +227,50 @@ ggplot(step.data2, aes(x = date, y = steps, fill = weekday)) +
     labs(title = 'Total number of steps taken each day', x = 'Date', y = 'Steps')
 ```
 
-> Calculate and report  the **mean** and **median** total number of steps taken per day.
+**Q4.2: Calculate and report  the _mean_ and _median_ total number of steps taken per day**
 
 After applyig the fill-in strategy, we have an **average** of `r fd(mean.steps2.total)` steps 
 and a **median** value of `r fd(median.steps2.total)` steps.
 
-> Do these values differ from the estimates from the first part of the assignment?
-What is the impact of imputing missing data on the estimates of the total daily number of steps?
+**Q4.3: Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?**
 
 |          |                         Mean |                           Median |
 |---------:|-----------------------------:|---------------------------------:|
 |Original  |      `r fd(mean.steps.total)`|        `r fd(median.steps.total)`|
 |*New*     |   *`r fd(mean.steps2.total)`*|     *`r fd(median.steps2.total)`*|
 
-
+Of course, since we're filling in with averages, we expected that 
+the average of averages will be the same.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-> Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+We'll use the *facets* feature of `ggplot` to print two panels: 
+one displaying the 5-minute interval data for the weekdays, 
+the other for the weekends.
 
+**Q1: Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.**
+
+First, we'll have to group the dataset into weekdays and weekends measurements.
+We'll do this using the built-in `weekdays` function in combination with *dplyr's*
+`group_by` and `summarize` functions.
 
 ```{r}
 week.steps <- step.data2 %>%
     mutate(day=weekdays(date, abbreviate=T), day.type=ifelse(day=='Sat' | day == 'Sun', 'Weekend', 'Weekday')) %>%
     group_by(interval, day.type) %>%
-    summarize(steps.total=sum(steps)) %>%
-    print
+    summarize(steps.total=sum(steps))
 
-breaks <- as.character(seq(from=0, to=2400, by=600))
-print(breaks)
+ht(week.steps)
+```
+
+*Note:* we could be using a factor variable: `day <- factor(c('Weekday', 'Weekend'))`,
+but I feel that the `mutate + if_else %>% group_by` combination makes it a bit easier to read
+and it obviates the need for a factor.
+
+
+**Q1: Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).**
+
+```{r}
 ggplot(week.steps, aes(x = interval, y = steps.total, color = interval)) +
     geom_line() +
     facet_grid(day.type ~ .) +  # break it into multiple panels aka facets
@@ -249,4 +281,5 @@ ggplot(week.steps, aes(x = interval, y = steps.total, color = interval)) +
          y='Average steps taken')
 ```
 
+From this plot we can see that the activity on weekdays is considerably higher than on weekends. 
 
