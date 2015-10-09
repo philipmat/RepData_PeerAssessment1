@@ -152,6 +152,7 @@ average.by.time <- days.with.steps %>%
 # plot(average.by.time$interval, average.by.time$steps.average, type='l')
 ggplot(average.by.time, aes(x=interval, y=steps.average, color = interval)) +
     geom_line() +  # line plot
+    scale_x_continuous(minor_breaks=breaks.hourly, breaks=breaks.ampm) +  # break lines every hour
     theme(legend.position='none') +  # remove legend - I want the gradient but not the legend
     labs(title='Average number of steps each 5-minute interval across all days',
          x='5-minute intervals',
@@ -346,11 +347,21 @@ week.steps <- step.data2 %>%
 ```
 
 ```r
+breaks <- as.character(seq(from=0, to=2400, by=600))
+print(breaks)
+```
+
+```
+## [1] "0"    "600"  "1200" "1800" "2400"
+```
+
+```r
 ggplot(week.steps, aes(x = interval, y = steps.total, color = interval)) +
     geom_line() +
     facet_grid(day.type ~ .) +  # break it into multiple panels aka facets
+    scale_x_continuous(minor_breaks=breaks.hourly, breaks=breaks.ampm) +  # break lines every hour
     theme(legend.position='none') +  # remove legend - I want the gradient but not the legend
-    labs(title='Differences in patterns between Weekdays and Weekends',
+    labs(title='Differences in patterns between weekdays and weekends',
          x='5-minute intervals',
          y='Average steps taken')
 ```
