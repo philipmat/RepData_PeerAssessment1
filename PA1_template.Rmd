@@ -225,3 +225,21 @@ What is the impact of imputing missing data on the estimates of the total daily 
 
 > Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
+
+```{r}
+week.steps <- step.data2 %>%
+    mutate(day=weekdays(date, abbreviate=T), day.type=ifelse(day=='Sat' | day == 'Sun', 'Weekend', 'Weekday')) %>%
+    group_by(interval, day.type) %>%
+    summarize(steps.total=sum(steps)) %>%
+    print
+
+ggplot(week.steps, aes(x = interval, y = steps.total, color = interval)) +
+    geom_line() +
+    facet_grid(day.type ~ .) +  # break it into multiple panels aka facets
+    theme(legend.position='none') +  # remove legend - I want the gradient but not the legend
+    labs(title='Differences in patterns between weekdays and weekends',
+         x='5-minute intervals',
+         y='Average steps taken')
+```
+
+
